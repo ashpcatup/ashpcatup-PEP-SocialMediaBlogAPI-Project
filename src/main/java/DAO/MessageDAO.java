@@ -1,0 +1,91 @@
+package DAO;
+// don't use try-with-resources. Don't need to close?
+
+import Model.Message;
+import Model.Account;
+import Util.ConnectionUtil;
+import java.sql.*;
+import java.util.*;
+import Util.ResourceCloser;
+
+public class MessageDAO {
+
+  public Message insertMessage(Message message){
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try{
+      String sql = "INSERT INTO message (posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
+      ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+      ps.setInt(1, message.getPosted_by());
+      ps.setString(2, message.getMessage_text());
+      ps.setLong(3, message.getTime_posted_epoch());
+      int result = ps.executeUpdate();
+      if(result != 1) return null;
+
+      rs = ps.getGeneratedKeys();
+      if(rs.next()){
+        int id = rs.getInt(1); // message id returned from database
+        return new Message(id, message.getPosted_by(), message.getMessage_text(), message.getTime_posted_epoch());
+      }
+
+    } catch(SQLException e){
+      e.printStackTrace();
+    } finally {
+      ResourceCloser.closeResources(rs, ps);
+    }
+    return null;
+  }
+ 
+  public Account getAccountById(int id){
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try{
+      String sql = "SELECT * FROM account WHERE account_id = ?";
+      ps = conn.prepareStatement(sql);
+      ps.setInt(1, id);
+      rs = ps.executeQuery();
+      if(rs.next()){
+        return new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
+      }
+
+    } catch(SQLException e){
+      e.printStackTrace();
+    } finally {
+      ResourceCloser.closeResources(rs, ps);
+    }
+    return null;
+  }
+
+  public List<Message> getAllMessages(){
+    List<Message> messageList = new ArrayList<>();
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try{
+      String sql = "SELECT * FROM message";
+      ps = conn.prepareStatement(sql);
+      rs = ps.executeQuery();
+      while(rs.next()){
+        Message message = new Message(
+          rs.getInt("message_id"), 
+          rs.getInt("posted_by"), 
+          rs.getString("message_text"), 
+          rs.getLong("time_posted_epoch"));
+        messageList.add(message);
+      }
+
+    } catch(SQLException e){
+      e.printStackTrace();
+    } finally {
+      ResourceCloser.closeResources(rs, ps);
+    }
+
+    return messageList;
+  }
+
+}
