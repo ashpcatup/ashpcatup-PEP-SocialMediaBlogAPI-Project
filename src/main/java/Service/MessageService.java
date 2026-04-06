@@ -27,5 +27,29 @@ public class MessageService {
     return messageDAO.getAllMessages();
   }
 
+  public Message getMessageById(int id){
+    return messageDAO.getMessageById(id);
+  }
+
+  public Message deleteMessageById(int id){
+    Message existing = messageDAO.getMessageById(id);
+    if(existing == null) return null;
+    messageDAO.deleteMessageById(id);
+    return existing;
+  }
+
+  public Message patchMessageById(int id, String text){
+    if(text == null || text.isBlank() || text.length() > 255) return null;
+    if(messageDAO.getMessageById(id) == null) return null;
+
+    if (messageDAO.patchMessageById(id, text) == 1) {
+      return messageDAO.getMessageById(id);
+    }else return null;
+  }
+
+  public List<Message> getAllMessagesByAccountId(int id){
+    return messageDAO.getAllMessagesByAccountId(id);
+}
+
 }
 

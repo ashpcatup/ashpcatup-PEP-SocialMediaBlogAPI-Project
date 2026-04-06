@@ -32,6 +32,10 @@ public class SocialMediaController {
         app.post("/login", this::loginHandler);
         app.post("/messages", this::addMessageHandler);
         app.get("/messages", this::getAllMessagesHandler);
+        app.get("/messages/{message_id}", this::getMessageByIdHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageByIdHandler);
+        app.patch("/messages/{message_id}", this::patchMessageByIdHandler);
+        app.get("/accounts/{account_id}/messages", this::getAllMessagesByAccountIdHandler);
         app.start(8080);
         return app;
     }
@@ -73,6 +77,46 @@ public class SocialMediaController {
         } else {
             ctx.status(401);
         }
+    }
+
+    private void getMessageByIdHandler(Context ctx){
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message message = messageService.getMessageById(id);
+    
+        if(message != null){
+            ctx.json(message);
+        } else {
+            ctx.result("");
+        }
+    }
+
+    private void deleteMessageByIdHandler(Context ctx){
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message deleted = messageService.deleteMessageById(id);
+    
+        if(deleted != null){
+            ctx.json(deleted); 
+        } else {
+            ctx.result("");
+        }
+    }
+
+    private void patchMessageByIdHandler(Context ctx){
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message update = ctx.bodyAsClass(Message.class);
+ 
+        Message newMessage = messageService.patchMessageById(id, update.getMessage_text());
+        if(newMessage != null){
+            ctx.json(newMessage);
+        }else{
+            ctx.status(400);
+        }
+    }
+
+    private void getAllMessagesByAccountIdHandler(Context ctx){
+        int id = Integer.parseInt(ctx.pathParam("account_id"));
+        List<Message> messages = messageService.getAllMessagesByAccountId(id);
+        ctx.json(messages);
     }
 
 

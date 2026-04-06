@@ -88,4 +88,98 @@ public class MessageDAO {
     return messageList;
   }
 
+  public Message getMessageById(int id){
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try{
+        String sql = "SELECT * FROM message WHERE message_id = ?";
+        ps = conn.prepareStatement(sql);
+        ps.setInt(1, id);
+        rs = ps.executeQuery();
+
+        if(rs.next()){
+          return new Message(
+            rs.getInt("message_id"),
+            rs.getInt("posted_by"),
+            rs.getString("message_text"),
+            rs.getLong("time_posted_epoch")
+          );
+        }
+
+    } catch(SQLException e){
+        e.printStackTrace();
+    } finally {
+        ResourceCloser.closeResources(rs, ps);
+    }
+
+    return null;
+  }
+
+  public void deleteMessageById(int id){
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+
+    try{
+        String sql = "DELETE FROM message WHERE message_id = ?";
+        ps = conn.prepareStatement(sql);
+        ps.setInt(1, id);
+        ps.executeUpdate();
+
+    } catch(SQLException e){
+        e.printStackTrace();
+    } finally {
+        ResourceCloser.closeResources(ps);
+    }
+  }
+
+  public int patchMessageById(int id, String text){
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+
+    try{
+      String sql = "UPDATE message SET message_text = ? WHERE message_id = ?";
+      ps = conn.prepareStatement(sql);
+      ps.setString(1, text);
+      ps.setInt(2, id);
+      return ps.executeUpdate();
+    }
+    catch(SQLException e){e.printStackTrace();}
+    finally {ResourceCloser.closeResources(ps);}
+
+    return 0;
+  }
+
+  public List<Message> getAllMessagesByAccountId(int id){
+    List<Message> messageList = new ArrayList<>();
+    Connection conn = ConnectionUtil.getConnection();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try{
+      String sql = "SELECT * FROM message WHERE posted_by = ?";
+      ps = conn.prepareStatement(sql);
+      ps.setInt(1, id);
+      rs = ps.executeQuery();
+
+      while(rs.next()){
+        Message message = new Message(
+          rs.getInt("message_id"),
+          rs.getInt("posted_by"),
+          rs.getString("message_text"),
+          rs.getLong("time_posted_epoch")
+        );
+        messageList.add(message);
+      }
+
+    } catch(SQLException e){
+        e.printStackTrace();
+    } finally {
+        ResourceCloser.closeResources(rs, ps);
+    }
+
+    return messageList;
+}
+
 }
