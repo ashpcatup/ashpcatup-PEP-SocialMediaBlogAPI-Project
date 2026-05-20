@@ -1,6 +1,4 @@
 package DAO;
-// don't use try-with-resources. Don't need to close?
-
 import Model.Message;
 import Model.Account;
 import Util.ConnectionUtil;
@@ -26,7 +24,7 @@ public class MessageDAO {
 
       rs = ps.getGeneratedKeys();
       if(rs.next()){
-        int id = rs.getInt(1); // message id returned from database
+        int id = rs.getInt(1); 
         return new Message(id, message.getPosted_by(), message.getMessage_text(), message.getTime_posted_epoch());
       }
 

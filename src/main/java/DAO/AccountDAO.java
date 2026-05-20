@@ -1,8 +1,3 @@
-package DAO;
-// don't use try-with-resources. Don't need to close?
-
-// test save 2
-
 import Model.Account;
 import Util.ConnectionUtil;
 import Util.ResourceCloser;

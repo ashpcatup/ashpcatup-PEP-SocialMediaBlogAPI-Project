@@ -4,8 +4,6 @@ import Model.Account;
 import java.util.*;
 import DAO.AccountDAO;
 
-// test save 2
-
 public class AccountService {
 
   private AccountDAO accountDAO;
